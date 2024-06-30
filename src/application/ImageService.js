@@ -9,30 +9,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserService = void 0;
-class UserService {
-    constructor(userRepository) {
-        this.userRepository = userRepository;
+exports.ImageService = void 0;
+class ImageService {
+    constructor(storageRepository) {
+        this.storageRepository = storageRepository;
     }
-    createUser(user) {
+    uploadImage(file) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.userRepository.save(user);
+            return this.storageRepository.upload(file);
         });
     }
-    getUser(id) {
+    deleteImage(fileKey) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.userRepository.findById(id);
-        });
-    }
-    updateUser(id, user) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.userRepository.update(user);
-        });
-    }
-    deleteUser(id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.userRepository.deleteById(id);
+            return this.storageRepository.delete(fileKey);
         });
     }
 }
-exports.UserService = UserService;
+exports.ImageService = ImageService;
