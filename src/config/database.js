@@ -13,12 +13,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.connectToMySQL = exports.connectToMongo = void 0;
+const dotenv_1 = __importDefault(require("dotenv"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const promise_1 = require("mysql2/promise");
-const mongoUri = 'mongodb+srv://pedroportillor22:pedroportillo@cluster0.sqnnlpq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+dotenv_1.default.config();
+// MongoDB connection configuration
 const connectToMongo = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield mongoose_1.default.connect(mongoUri);
+        yield mongoose_1.default.connect(process.env.MONGO_URI);
         console.log('Connected to MongoDB');
     }
     catch (error) {
@@ -27,13 +29,14 @@ const connectToMongo = () => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.connectToMongo = connectToMongo;
+// MySQL connection configuration
 const connectToMySQL = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const connection = yield (0, promise_1.createConnection)({
-            host: 'localhost',
-            user: 'root',
-            password: '',
-            database: 'apiexagonalmantenimiento',
+            host: process.env.MYSQL_HOST,
+            user: process.env.MYSQL_USER,
+            password: process.env.MYSQL_PASSWORD,
+            database: process.env.MYSQL_DATABASE
         });
         console.log('Connected to MySQL');
         return connection;

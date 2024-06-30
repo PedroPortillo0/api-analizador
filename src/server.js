@@ -59,6 +59,7 @@ function startServer() {
         app.get('/users/mongo/:id', (req, res) => mongoUserController.getUser(req, res));
         app.put('/users/mongo/:id', (req, res) => mongoUserController.updateUser(req, res));
         app.delete('/users/mongo/:id', (req, res) => mongoUserController.deleteUser(req, res));
+
         app.post('/users/mysql', (req, res) => mysqlUserController.createUser(req, res));
         app.get('/users/mysql/:id', (req, res) => mysqlUserController.getUser(req, res));
         app.put('/users/mysql/:id', (req, res) => mysqlUserController.updateUser(req, res));
@@ -68,6 +69,7 @@ function startServer() {
         app.get('/vendedores/mongo/:id', (req, res) => mongoVendedorController.getVendedor(req, res));
         app.put('/vendedores/mongo/:id', (req, res) => mongoVendedorController.updateVendedor(req, res));
         app.delete('/vendedores/mongo/:id', (req, res) => mongoVendedorController.deleteVendedor(req, res));
+
         app.post('/vendedores/mysql', (req, res) => mysqlVendedorController.createVendedor(req, res));
         app.get('/vendedores/mysql/:id', (req, res) => mysqlVendedorController.getVendedor(req, res));
         app.put('/vendedores/mysql/:id', (req, res) => mysqlVendedorController.updateVendedor(req, res));
@@ -77,6 +79,7 @@ function startServer() {
         app.get('/appointments/mongo/:id', (req, res) => mongoAppointmentController.getAppointment(req, res));
         app.put('/appointments/mongo/:id', (req, res) => mongoAppointmentController.updateAppointment(req, res));
         app.delete('/appointments/mongo/:id', (req, res) => mongoAppointmentController.deleteAppointment(req, res));
+        
         app.post('/appointments/mysql', (req, res) => mysqlAppointmentController.createAppointment(req, res));
         app.get('/appointments/mysql/:id', (req, res) => mysqlAppointmentController.getAppointment(req, res));
         app.put('/appointments/mysql/:id', (req, res) => mysqlAppointmentController.updateAppointment(req, res));
