@@ -1,5 +1,4 @@
 import { IStorageRepository } from '../domain/IStorageRepository';
-import { Express } from 'express';
 
 export class ImageService {
     constructor(private storageRepository: IStorageRepository) {}

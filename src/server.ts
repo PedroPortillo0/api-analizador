@@ -7,11 +7,8 @@ import { UserController } from './adapters/http/userController';
 import { VendedorController } from './adapters/http/vendedorController';
 import { AppointmentController } from './adapters/http/appointmentController';
 import { ImageController } from './adapters/http/ImageController';
-import { MongoUserRepository } from './adapters/persistence/mongoUserRepository';
 import { MysqlUserRepository } from './adapters/persistence/mysqlUserRepository';
-import { MongoVendedorRepository } from './adapters/persistence/mongoVendedorRepository';
 import { MysqlVendedorRepository } from './adapters/persistence/mysqlVendedorRepository';
-import { MongoAppointmentRepository } from './adapters/persistence/mongoAppointmentRepository';
 import { MysqlAppointmentRepository } from './adapters/persistence/mysqlAppointmentRepository';
 import { S3StorageRepository } from './adapters/persistence/S3StorageRepository';
 import { UserService } from './application/userService';
@@ -20,28 +17,11 @@ import { AppointmentService } from './application/appointmentService';
 import { ImageService } from './application/ImageService';
 
 
-
-
-
 const app = express();
 app.use(bodyParser.json());
 const upload = multer();
 
 async function startServer() {
-    // Conectar a MongoDB
-    await connectToMongo();
-    const mongoUserRepository = new MongoUserRepository();
-    const mongoUserService = new UserService(mongoUserRepository);
-    const mongoUserController = new UserController(mongoUserService);
-
-    const mongoVendedorRepository = new MongoVendedorRepository();
-    const mongoVendedorService = new VendedorService(mongoVendedorRepository);
-    const mongoVendedorController = new VendedorController(mongoVendedorService);
-
-    const mongoAppointmentRepository = new MongoAppointmentRepository();
-    const mongoAppointmentService = new AppointmentService(mongoAppointmentRepository);
-    const mongoAppointmentController = new AppointmentController(mongoAppointmentService);
-
     // Conectar a MySQL
     const mysqlConnection = await connectToMySQL();
     const mysqlUserRepository = new MysqlUserRepository(mysqlConnection);
@@ -61,33 +41,19 @@ async function startServer() {
     const imageService = new ImageService(s3StorageRepository);
     const imageController = new ImageController(imageService);
 
-    // Rutas para Usuarios (MongoDB y MySQL)
-    app.post('/users/mongo', (req, res) => mongoUserController.createUser(req, res));
-    app.get('/users/mongo/:id', (req, res) => mongoUserController.getUser(req, res));
-    app.put('/users/mongo/:id', (req, res) => mongoUserController.updateUser(req, res));
-    app.delete('/users/mongo/:id', (req, res) => mongoUserController.deleteUser(req, res));
-
+    // Rutas para Usuarios (MySQL)
     app.post('/users/mysql', (req, res) => mysqlUserController.createUser(req, res));
     app.get('/users/mysql/:id', (req, res) => mysqlUserController.getUser(req, res));
     app.put('/users/mysql/:id', (req, res) => mysqlUserController.updateUser(req, res));
     app.delete('/users/mysql/:id', (req, res) => mysqlUserController.deleteUser(req, res));
 
-    // Rutas para Vendedores (MongoDB y MySQL)
-    app.post('/vendedores/mongo', (req, res) => mongoVendedorController.createVendedor(req, res));
-    app.get('/vendedores/mongo/:id', (req, res) => mongoVendedorController.getVendedor(req, res));
-    app.put('/vendedores/mongo/:id', (req, res) => mongoVendedorController.updateVendedor(req, res));
-    app.delete('/vendedores/mongo/:id', (req, res) => mongoVendedorController.deleteVendedor(req, res));
-
+    // Rutas para Vendedores (MySQL)
     app.post('/vendedores/mysql', (req, res) => mysqlVendedorController.createVendedor(req, res));
     app.get('/vendedores/mysql/:id', (req, res) => mysqlVendedorController.getVendedor(req, res));
     app.put('/vendedores/mysql/:id', (req, res) => mysqlVendedorController.updateVendedor(req, res));
     app.delete('/vendedores/mysql/:id', (req, res) => mysqlVendedorController.deleteVendedor(req, res));
 
-    // Rutas para Citas (MongoDB y MySQL)
-    app.post('/appointments/mongo', (req, res) => mongoAppointmentController.createAppointment(req, res));
-    app.get('/appointments/mongo/:id', (req, res) => mongoAppointmentController.getAppointment(req, res));
-    app.put('/appointments/mongo/:id', (req, res) => mongoAppointmentController.updateAppointment(req, res));
-    app.delete('/appointments/mongo/:id', (req, res) => mongoAppointmentController.deleteAppointment(req, res));
+    // Rutas para Citas (MySQL)
 
     app.post('/appointments/mysql', (req, res) => mysqlAppointmentController.createAppointment(req, res));
     app.get('/appointments/mysql/:id', (req, res) => mysqlAppointmentController.getAppointment(req, res));
