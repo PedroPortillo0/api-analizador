@@ -1,20 +1,7 @@
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
 import { createConnection } from 'mysql2/promise';
 
-
 dotenv.config();
-
-// MongoDB connection configuration
-export const connectToMongo = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI as string);
-    console.log('Connected to MongoDB');
-  } catch (error) {
-    console.error('Error connecting to MongoDB', error);
-    process.exit(1);
-  }
-};
 
 // MySQL connection configuration
 export const connectToMySQL = async () => {

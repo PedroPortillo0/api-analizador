@@ -1,7 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import multer from 'multer';
-import { connectToMongo } from './config/database';
 import { connectToMySQL } from './config/database';
 import { UserController } from './adapters/http/userController';
 import { VendedorController } from './adapters/http/vendedorController';
@@ -15,7 +14,6 @@ import { UserService } from './application/userService';
 import { VendedorService } from './application/vendedorService';
 import { AppointmentService } from './application/appointmentService';
 import { ImageService } from './application/ImageService';
-
 
 const app = express();
 app.use(bodyParser.json());
@@ -46,6 +44,8 @@ async function startServer() {
     app.get('/users/mysql/:id', (req, res) => mysqlUserController.getUser(req, res));
     app.put('/users/mysql/:id', (req, res) => mysqlUserController.updateUser(req, res));
     app.delete('/users/mysql/:id', (req, res) => mysqlUserController.deleteUser(req, res));
+    // Nueva ruta para actualizar la contraseña
+    app.put('/users/mysql/:id/password', (req, res) => mysqlUserController.updatePassword(req, res));
 
     // Rutas para Vendedores (MySQL)
     app.post('/vendedores/mysql', (req, res) => mysqlVendedorController.createVendedor(req, res));
@@ -54,7 +54,6 @@ async function startServer() {
     app.delete('/vendedores/mysql/:id', (req, res) => mysqlVendedorController.deleteVendedor(req, res));
 
     // Rutas para Citas (MySQL)
-
     app.post('/appointments/mysql', (req, res) => mysqlAppointmentController.createAppointment(req, res));
     app.get('/appointments/mysql/:id', (req, res) => mysqlAppointmentController.getAppointment(req, res));
     app.put('/appointments/mysql/:id', (req, res) => mysqlAppointmentController.updateAppointment(req, res));

@@ -12,23 +12,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.connectToMySQL = exports.connectToMongo = void 0;
+exports.connectToMySQL = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
-const mongoose_1 = __importDefault(require("mongoose"));
 const promise_1 = require("mysql2/promise");
 dotenv_1.default.config();
-// MongoDB connection configuration
-const connectToMongo = () => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        yield mongoose_1.default.connect(process.env.MONGO_URI);
-        console.log('Connected to MongoDB');
-    }
-    catch (error) {
-        console.error('Error connecting to MongoDB', error);
-        process.exit(1);
-    }
-});
-exports.connectToMongo = connectToMongo;
 // MySQL connection configuration
 const connectToMySQL = () => __awaiter(void 0, void 0, void 0, function* () {
     try {

@@ -29,4 +29,12 @@ export class UserController {
         await this.userService.deleteUser(id);
         return res.status(204).send();
     }
+
+    // Nuevo método para actualizar la contraseña
+    public async updatePassword(req: Request, res: Response): Promise<Response> {
+        const id = req.params.id;
+        const { password } = req.body;
+        const updatedUser = await this.userService.updatePassword(id, password);
+        return res.status(200).json(updatedUser);
+    }
 }

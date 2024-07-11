@@ -43,4 +43,13 @@ export class MysqlUserRepository implements UserRepository {
     async deleteById(id: string): Promise<void> {
         await this.connection.execute('DELETE FROM users WHERE id = ?', [id]);
     }
+
+    // Nuevo método para actualizar solo la contraseña
+    async updatePassword(user: User): Promise<User | null> {
+        await this.connection.execute(
+            'UPDATE users SET password = ? WHERE id = ?',
+            [user.password, user.id]
+        );
+        return user;
+    }
 }

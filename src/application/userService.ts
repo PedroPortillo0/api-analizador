@@ -19,4 +19,14 @@ export class UserService {
     async deleteUser(id: string): Promise<void> {
         return this.userRepository.deleteById(id);
     }
+
+    // Nuevo método para actualizar la contraseña
+    async updatePassword(id: string, password: string): Promise<User | null> {
+        const user = await this.userRepository.findById(id);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        user.password = password;
+        return this.userRepository.updatePassword(user);
+    }
 }

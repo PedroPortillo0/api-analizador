@@ -8,7 +8,11 @@ export interface UserRepository {
     findAll(): Promise<User[]>;
     update(user: User): Promise<User | null>;
     deleteById(id: string): Promise<void>;
+
+    // Nuevo método para actualizar solo la contraseña
+    updatePassword(user: User): Promise<User | null>;
 }
+
 
 export interface VendedorRepository {
     save(vendedor: Vendedor): Promise<Vendedor>;
@@ -25,3 +29,4 @@ export interface AppointmentRepository {
     update(appointment: Appointment): Promise<Appointment | null>;
     deleteById(id: string): Promise<void>;
 }
+
