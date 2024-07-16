@@ -29,4 +29,9 @@ export class VendedorController {
         await this.vendedorService.deleteVendedor(id);
         return res.status(204).send();
     }
+
+    public async getAllVendedores(req: Request, res: Response): Promise<Response> {
+        const vendedores = await this.vendedorService.getAllVendedores();
+        return res.status(200).json(vendedores);
+    }
 }

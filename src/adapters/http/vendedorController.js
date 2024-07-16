@@ -43,5 +43,11 @@ class VendedorController {
             return res.status(204).send();
         });
     }
+    getAllVendedores(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const vendedores = yield this.vendedorService.getAllVendedores();
+            return res.status(200).json(vendedores);
+        });
+    }
 }
 exports.VendedorController = VendedorController;

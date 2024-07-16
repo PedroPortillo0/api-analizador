@@ -49,7 +49,7 @@ function startServer() {
         const imageService = new ImageService_1.ImageService(s3StorageRepository);
         const imageController = new ImageController_1.ImageController(imageService);
         // Rutas para Usuarios (MySQL)
-        app.post('/users/mysql', (req, res) => mysqlUserController.createUser(req, res));
+        app.post('/uxsers/mysql', (req, res) => mysqlUserController.createUser(req, res));
         app.get('/users/mysql/:id', (req, res) => mysqlUserController.getUser(req, res));
         app.put('/users/mysql/:id', (req, res) => mysqlUserController.updateUser(req, res));
         app.delete('/users/mysql/:id', (req, res) => mysqlUserController.deleteUser(req, res));
@@ -60,6 +60,7 @@ function startServer() {
         app.get('/vendedores/mysql/:id', (req, res) => mysqlVendedorController.getVendedor(req, res));
         app.put('/vendedores/mysql/:id', (req, res) => mysqlVendedorController.updateVendedor(req, res));
         app.delete('/vendedores/mysql/:id', (req, res) => mysqlVendedorController.deleteVendedor(req, res));
+        app.get('/vendedores/mysql', (req, res) => mysqlVendedorController.getAllVendedores(req, res)); // Nueva ruta agregada
         // Rutas para Citas (MySQL)
         app.post('/appointments/mysql', (req, res) => mysqlAppointmentController.createAppointment(req, res));
         app.get('/appointments/mysql/:id', (req, res) => mysqlAppointmentController.getAppointment(req, res));

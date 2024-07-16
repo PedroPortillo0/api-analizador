@@ -19,4 +19,8 @@ export class VendedorService {
     async deleteVendedor(id: string): Promise<void> {
         return this.vendedorRepository.deleteById(id);
     }
+
+    async getAllVendedores(): Promise<Vendedor[]> {
+        return this.vendedorRepository.findAll();
+    }
 }

@@ -34,5 +34,10 @@ class VendedorService {
             return this.vendedorRepository.deleteById(id);
         });
     }
+    getAllVendedores() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.vendedorRepository.findAll();
+        });
+    }
 }
 exports.VendedorService = VendedorService;

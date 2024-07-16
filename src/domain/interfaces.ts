@@ -20,6 +20,7 @@ export interface VendedorRepository {
     findAll(): Promise<Vendedor[]>;
     update(vendedor: Vendedor): Promise<Vendedor | null>;
     deleteById(id: string): Promise<void>;
+    findAll(): Promise<Vendedor[]>;
 }
 
 export interface AppointmentRepository {
