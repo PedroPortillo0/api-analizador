@@ -14,64 +14,78 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
-const multer_1 = __importDefault(require("multer"));
+const dotenv_1 = __importDefault(require("dotenv"));
+const express_validator_1 = require("express-validator");
+const sqlController_1 = require("./adapters/http/sqlController");
 const database_1 = require("./config/database");
-const userController_1 = require("./adapters/http/userController");
-const vendedorController_1 = require("./adapters/http/vendedorController");
-const appointmentController_1 = require("./adapters/http/appointmentController");
-const ImageController_1 = require("./adapters/http/ImageController");
-const mysqlUserRepository_1 = require("./adapters/persistence/mysqlUserRepository");
-const mysqlVendedorRepository_1 = require("./adapters/persistence/mysqlVendedorRepository");
-const mysqlAppointmentRepository_1 = require("./adapters/persistence/mysqlAppointmentRepository");
-const S3StorageRepository_1 = require("./adapters/persistence/S3StorageRepository");
-const userService_1 = require("./application/userService");
-const vendedorService_1 = require("./application/vendedorService");
-const appointmentService_1 = require("./application/appointmentService");
-const ImageService_1 = require("./application/ImageService");
+const uncaughtException_1 = require("./config/uncaughtException");
+dotenv_1.default.config(); // Asegúrate de que esto se ejecute primero
 const app = (0, express_1.default)();
 app.use(body_parser_1.default.json());
-const upload = (0, multer_1.default)();
+let mysqlConnection;
 function startServer() {
     return __awaiter(this, void 0, void 0, function* () {
-        // Conectar a MySQL
-        const mysqlConnection = yield (0, database_1.connectToMySQL)();
-        const mysqlUserRepository = new mysqlUserRepository_1.MysqlUserRepository(mysqlConnection);
-        const mysqlUserService = new userService_1.UserService(mysqlUserRepository);
-        const mysqlUserController = new userController_1.UserController(mysqlUserService);
-        const mysqlVendedorRepository = new mysqlVendedorRepository_1.MysqlVendedorRepository(mysqlConnection);
-        const mysqlVendedorService = new vendedorService_1.VendedorService(mysqlVendedorRepository);
-        const mysqlVendedorController = new vendedorController_1.VendedorController(mysqlVendedorService);
-        const mysqlAppointmentRepository = new mysqlAppointmentRepository_1.MysqlAppointmentRepository(mysqlConnection);
-        const mysqlAppointmentService = new appointmentService_1.AppointmentService(mysqlAppointmentRepository);
-        const mysqlAppointmentController = new appointmentController_1.AppointmentController(mysqlAppointmentService);
-        // Repositorio de almacenamiento S3
-        const s3StorageRepository = new S3StorageRepository_1.S3StorageRepository();
-        const imageService = new ImageService_1.ImageService(s3StorageRepository);
-        const imageController = new ImageController_1.ImageController(imageService);
-        // Rutas para Usuarios (MySQL)
-        app.post('/uxsers/mysql', (req, res) => mysqlUserController.createUser(req, res));
-        app.get('/users/mysql/:id', (req, res) => mysqlUserController.getUser(req, res));
-        app.put('/users/mysql/:id', (req, res) => mysqlUserController.updateUser(req, res));
-        app.delete('/users/mysql/:id', (req, res) => mysqlUserController.deleteUser(req, res));
-        // Nueva ruta para actualizar la contraseña
-        app.put('/users/mysql/:id/password', (req, res) => mysqlUserController.updatePassword(req, res));
-        // Rutas para Vendedores (MySQL)
-        app.post('/vendedores/mysql', (req, res) => mysqlVendedorController.createVendedor(req, res));
-        app.get('/vendedores/mysql/:id', (req, res) => mysqlVendedorController.getVendedor(req, res));
-        app.put('/vendedores/mysql/:id', (req, res) => mysqlVendedorController.updateVendedor(req, res));
-        app.delete('/vendedores/mysql/:id', (req, res) => mysqlVendedorController.deleteVendedor(req, res));
-        app.get('/vendedores/mysql', (req, res) => mysqlVendedorController.getAllVendedores(req, res)); // Nueva ruta agregada
-        // Rutas para Citas (MySQL)
-        app.post('/appointments/mysql', (req, res) => mysqlAppointmentController.createAppointment(req, res));
-        app.get('/appointments/mysql/:id', (req, res) => mysqlAppointmentController.getAppointment(req, res));
-        app.put('/appointments/mysql/:id', (req, res) => mysqlAppointmentController.updateAppointment(req, res));
-        app.delete('/appointments/mysql/:id', (req, res) => mysqlAppointmentController.deleteAppointment(req, res));
-        // Rutas para Imágenes
-        app.post('/images/upload', upload.single('file'), (req, res) => imageController.uploadImage(req, res));
-        app.delete('/images/:key', (req, res) => imageController.deleteImage(req, res));
-        app.listen(3000, () => {
-            console.log('Server is running on port 3000');
-        });
+        try {
+            mysqlConnection = yield (0, database_1.connectToMySQL)();
+            console.log('Conexión a MySQL establecida');
+            // Rutas para ejecutar SQL
+            app.post('/sql/execute-sql', sqlController_1.executeSql);
+            // Rutas de autenticación con validación
+            app.post('/auth/mysql/register', [
+                (0, express_validator_1.check)('nombre').notEmpty().withMessage('Nombre es requerido'),
+                (0, express_validator_1.check)('apellido').notEmpty().withMessage('Apellido es requerido'),
+                (0, express_validator_1.check)('correo').isEmail().withMessage('Correo no es válido'),
+                (0, express_validator_1.check)('password').isLength({ min: 5 }).withMessage('Password debe tener al menos 5 caracteres'),
+            ], (req, res) => __awaiter(this, void 0, void 0, function* () {
+                const errors = (0, express_validator_1.validationResult)(req);
+                if (!errors.isEmpty()) {
+                    return res.status(400).json({ errors: errors.array() });
+                }
+                // Lógica de registro aquí
+                const { nombre, apellido, correo, password } = req.body;
+                const sql = `INSERT INTO users (nombre, apellido, correo, password) VALUES (?, ?, ?, ?)`;
+                try {
+                    const [result] = yield mysqlConnection.execute(sql, [nombre, apellido, correo, password]);
+                    res.status(201).json({ message: 'User registered successfully', userId: result.insertId });
+                }
+                catch (error) {
+                    res.status(500).json({ message: 'Error registering user', error: error.message });
+                }
+            }));
+            app.post('/auth/mysql/login', [
+                (0, express_validator_1.check)('correo').isEmail().withMessage('Correo no es válido'),
+                (0, express_validator_1.check)('password').notEmpty().withMessage('Password es requerido'),
+            ], (req, res) => __awaiter(this, void 0, void 0, function* () {
+                const errors = (0, express_validator_1.validationResult)(req);
+                if (!errors.isEmpty()) {
+                    return res.status(400).json({ errors: errors.array() });
+                }
+                // Lógica de login aquí
+                const { correo, password } = req.body;
+                const sql = `SELECT * FROM users WHERE correo = ? AND password = ?`;
+                try {
+                    const [rows] = yield mysqlConnection.execute(sql, [correo, password]);
+                    if (rows.length > 0) {
+                        res.status(200).json({ message: 'Login successful', user: rows[0] });
+                    }
+                    else {
+                        res.status(401).json({ message: 'Invalid credentials' });
+                    }
+                }
+                catch (error) {
+                    res.status(500).json({ message: 'Error logging in', error: error.message });
+                }
+            }));
+            app.listen(3000, () => {
+                console.log('Server is running on port 3000');
+            });
+        }
+        catch (error) {
+            console.error('Error al iniciar el servidor:', error);
+        }
     });
 }
 startServer().catch(err => console.error(err));
+process.on('uncaughtException', (err) => {
+    (0, uncaughtException_1.handleUncaughtExceptions)(err);
+});

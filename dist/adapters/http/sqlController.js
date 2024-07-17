@@ -12,24 +12,40 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.connectToMySQL = void 0;
+exports.executeSql = void 0;
 const promise_1 = __importDefault(require("mysql2/promise"));
 const dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config(); // Esto debe estar aquí para cargar las variables de entorno
-const connectToMySQL = () => __awaiter(void 0, void 0, void 0, function* () {
+dotenv_1.default.config();
+const pool = promise_1.default.createPool({
+    host: process.env.MYSQL_HOST,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DATABASE,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+});
+const executeSql = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const sql = req.body.sql;
+    if (!sql) {
+        res.status(400).json({ message: "No SQL query provided." });
+        return;
+    }
     try {
-        const connection = yield promise_1.default.createConnection({
-            host: process.env.MYSQL_HOST,
-            user: process.env.MYSQL_USER,
-            password: process.env.MYSQL_PASSWORD,
-            database: process.env.MYSQL_DATABASE
-        });
-        console.log('Conectado a MySQL');
-        return connection;
+        const [results] = yield pool.query(sql);
+        res.json({ results });
     }
     catch (error) {
-        console.error('Error connecting to MySQL', error);
-        throw error;
+        if (error instanceof Error) {
+            res
+                .status(500)
+                .json({ message: "Error executing SQL query.", error: error.message });
+        }
+        else {
+            res
+                .status(500)
+                .json({ message: "Error executing SQL query.", error: String(error) });
+        }
     }
 });
-exports.connectToMySQL = connectToMySQL;
+exports.executeSql = executeSql;
