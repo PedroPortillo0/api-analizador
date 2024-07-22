@@ -15,12 +15,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const cors_1 = __importDefault(require("cors"));
 const express_validator_1 = require("express-validator");
 const sqlController_1 = require("./adapters/http/sqlController");
 const database_1 = require("./config/database");
 const uncaughtException_1 = require("./config/uncaughtException");
-dotenv_1.default.config(); // Asegúrate de que esto se ejecute primero
+dotenv_1.default.config();
 const app = (0, express_1.default)();
+app.use((0, cors_1.default)());
 app.use(body_parser_1.default.json());
 let mysqlConnection;
 function startServer() {
@@ -30,10 +32,34 @@ function startServer() {
             console.log('Conexión a MySQL establecida');
             // Rutas para ejecutar SQL
             app.post('/sql/execute-sql', sqlController_1.executeSql);
+            // Ruta para crear base de datos
+            app.post('/create-database', [
+                (0, express_validator_1.check)('databaseName')
+                    .notEmpty().withMessage('Database name is required')
+                    .matches(/^[^\d]*$/).withMessage('Database name must not contain numbers')
+            ], (req, res) => __awaiter(this, void 0, void 0, function* () {
+                const errors = (0, express_validator_1.validationResult)(req);
+                if (!errors.isEmpty()) {
+                    return res.status(400).json({ errors: errors.array() });
+                }
+                const { databaseName } = req.body;
+                const sql = `CREATE DATABASE ${databaseName}`;
+                try {
+                    yield mysqlConnection.execute(sql);
+                    res.status(201).json({ message: 'Database created successfully' });
+                }
+                catch (error) {
+                    res.status(500).json({ message: 'Error creating database', error: error.message });
+                }
+            }));
             // Rutas de autenticación con validación
             app.post('/auth/mysql/register', [
-                (0, express_validator_1.check)('nombre').notEmpty().withMessage('Nombre es requerido'),
-                (0, express_validator_1.check)('apellido').notEmpty().withMessage('Apellido es requerido'),
+                (0, express_validator_1.check)('nombre')
+                    .notEmpty().withMessage('Nombre es requerido')
+                    .matches(/^[^\d]+$/).withMessage('El nombre no debe contener números'),
+                (0, express_validator_1.check)('apellido')
+                    .notEmpty().withMessage('Apellido es requerido')
+                    .matches(/^[^\d]+$/).withMessage('El apellido no debe contener números'),
                 (0, express_validator_1.check)('correo').isEmail().withMessage('Correo no es válido'),
                 (0, express_validator_1.check)('password').isLength({ min: 5 }).withMessage('Password debe tener al menos 5 caracteres'),
             ], (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -41,7 +67,6 @@ function startServer() {
                 if (!errors.isEmpty()) {
                     return res.status(400).json({ errors: errors.array() });
                 }
-                // Lógica de registro aquí
                 const { nombre, apellido, correo, password } = req.body;
                 const sql = `INSERT INTO users (nombre, apellido, correo, password) VALUES (?, ?, ?, ?)`;
                 try {
@@ -60,7 +85,6 @@ function startServer() {
                 if (!errors.isEmpty()) {
                     return res.status(400).json({ errors: errors.array() });
                 }
-                // Lógica de login aquí
                 const { correo, password } = req.body;
                 const sql = `SELECT * FROM users WHERE correo = ? AND password = ?`;
                 try {
